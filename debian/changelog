@@ -1,0 +1,87 @@
+silversearcher-ag (0.28.0-1) unstable; urgency=medium
+
+  * new upstream release
+  * upload to unstable
+
+ -- Hajime Mizuno <mizuno-as@ubuntu.com>  Mon, 26 Jan 2015 10:32:49 +0900
+
+silversearcher-ag (0.27.0-1) experimental; urgency=medium
+
+  * new upstream release
+  * debian/preinst,postrm
+    - drop these files since it doesn't conflict with other package anymore
+      see Bug#717989 and #736055
+
+ -- Hajime Mizuno <mizuno-as@ubuntu.com>  Wed, 19 Nov 2014 21:20:44 +0900
+
+silversearcher-ag (0.26.0-1) unstable; urgency=medium
+
+  * new upstream release
+  * debian/control
+    - set Standards-Version: 3.9.6.
+
+ -- Hajime Mizuno <mizuno-as@ubuntu.com>  Sun, 26 Oct 2014 13:11:51 +0900
+
+silversearcher-ag (0.24.1-1) unstable; urgency=medium
+
+  * new upstream release
+  * debian/control
+    - Fixed typo in alternative. (Closes: #759695)
+  * add debian/watch
+
+ -- Hajime Mizuno <mizuno-as@ubuntu.com>  Tue, 16 Sep 2014 20:39:54 +0900
+
+silversearcher-ag (0.22.0-1) unstable; urgency=medium
+
+  * new upstream release
+
+ -- Hajime Mizuno <mizuno-as@ubuntu.com>  Sun, 15 Jun 2014 14:08:20 +0900
+
+silversearcher-ag (0.19.2-1) unstable; urgency=medium
+
+  * new upstream release
+  * debian/control
+    - set Standards-Version: 3.9.5.
+  * debian/rules
+    - add empty "override_dh_auto_test" to skip the test.
+      because cram is required for testing, but package does not exist.
+  * debian/copyright
+    - update copyright year to 2013-2014.
+
+ -- Hajime Mizuno <mizuno-as@ubuntu.com>  Wed, 29 Jan 2014 23:23:00 +0900
+
+silversearcher-ag (0.18.1+20131108-1) unstable; urgency=low
+
+  * new upstream release
+
+ -- Hajime Mizuno <mizuno-as@ubuntu.com>  Fri, 08 Nov 2013 15:12:58 +0900
+
+silversearcher-ag (0.15+20130830-1) unstable; urgency=low
+
+  * new upstream release
+  * debian/copyright
+    - Update notice as debian/* files has been relicensed under Apache-2.0.
+
+ -- Hajime Mizuno <mizuno-as@ubuntu.com>  Fri, 30 Aug 2013 10:59:37 +0900
+
+silversearcher-ag (0.15~pre+20130512-1) unstable; urgency=low
+
+  * new upstream release
+  * debian/control
+    - add "Build-Depends: liblzma-dev" to search for .xz compressed files.
+
+ -- Hajime Mizuno <mizuno-as@ubuntu.com>  Sun, 12 May 2013 16:21:12 +0900
+
+silversearcher-ag (0.0~20130213+git55028b4e-2) unstable; urgency=low
+
+  * use dpkg-divert to avoid conflict with python-ase (Closes: #705092)
+    - debian/preinst,postrm: divert the /usr/bin/ag and
+                             /usr/share/man/man1/ag.1.gz
+
+ -- Hajime Mizuno <mizuno-as@ubuntu.com>  Wed, 08 May 2013 14:06:19 +0900
+
+silversearcher-ag (0.0~20130213+git55028b4e-1) unstable; urgency=low
+
+  * Initial release (Closes: #700155)
+
+ -- Hajime Mizuno <mizuno-as@ubuntu.com>  Wed, 13 Feb 2013 20:31:42 +0900

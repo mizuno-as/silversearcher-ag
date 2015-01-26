@@ -1,0 +1,16 @@
+#!/usr/bin/make -f
+%:
+	dh $@ --with autoreconf
+
+override_dh_autoreconf:
+	dh_autoreconf --as-needed
+
+override_dh_auto_configure:
+	dh_auto_configure -- --disable-silent-rules
+
+override_dh_auto_test:
+
+override_dh_install:
+	mv  $(CURDIR)/debian/silversearcher-ag/usr/share/the_silver_searcher/completions/ag.bashcomp.sh \
+            $(CURDIR)/debian/silversearcher-ag/etc/bash_completion.d/ag
+	rm -rf $(CURDIR)/debian/silversearcher-ag/usr/share/the_silver_searcher

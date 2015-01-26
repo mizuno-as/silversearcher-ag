@@ -1,0 +1,17 @@
+Source: silversearcher-ag
+Section: utils
+Priority: extra
+Maintainer: Hajime Mizuno <mizuno-as@ubuntu.com>
+Build-Depends: debhelper (>= 9.0.0), dh-autoreconf, pkg-config, libpcre3-dev, zlib1g-dev, liblzma-dev
+Standards-Version: 3.9.6
+Homepage: https://github.com/ggreer/the_silver_searcher
+
+Package: silversearcher-ag
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: very fast grep-like program, alternative to ack-grep
+ The Silver Searcher is grep-like program implemented by C.
+ An attempt to make something better than ack-grep.
+ .
+ It searches pattern about 3–5x faster than ack-grep.
+ It ignores file patterns from your .gitignore and .hgignore.
