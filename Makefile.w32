@@ -1,0 +1,32 @@
+GREP=grep
+VERSION:=$(shell $(GREP) -Po "(?<=\[)([0-9.]+.[0-9]+.[0-9]+)(?=\])" configure.ac)
+
+CC=gcc
+
+SRCS = \
+	src/decompress.c \
+	src/ignore.c \
+	src/lang.c \
+	src/log.c \
+	src/main.c \
+	src/options.c \
+	src/print.c \
+	src/scandir.c \
+	src/search.c \
+	src/util.c
+OBJS = $(subst .c,.o,$(SRCS))
+
+CFLAGS = -O2 -Isrc/win32 -DPACKAGE_VERSION=\"$(VERSION)\"
+LIBS = -lz -lpthread -lpcre -llzma -lshlwapi
+TARGET = ag.exe
+
+all : $(TARGET)
+
+$(TARGET) : $(OBJS)
+	$(CC) -o $@ $(OBJS) $(LIBS)
+
+.c.o :
+	$(CC) -c $(CFLAGS) -Isrc $< -o $@
+
+clean :
+	rm -f src/*.o $(TARGET)
