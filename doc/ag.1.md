@@ -55,6 +55,9 @@ Recursively search for PATTERN in PATH. Like grep or ack, but faster.
   * `--depth NUM`:
     Search up to NUM directories deep, -1 for unlimited. Default is 25.
 
+  * `--[no]filename`:
+    Print file names. Enabled by default, except when searching a single file.
+
   * `-f --follow`:
     Follow symlinks.
 
@@ -102,8 +105,11 @@ Recursively search for PATTERN in PATH. Like grep or ack, but faster.
   * `-m --max-count NUM`:
     Skip the rest of a file after NUM matches. Default is 0, which never skips.
 
-  * `--no-numbers`:
-    Don't show line numbers.
+  * `--[no]numbers`:
+    Print line numbers. Default is to omit line numbers when searching streams.
+
+  * `-o --only-matching`:
+    Print only the matching part of the lines.
   
   * `-p --path-to-agignore STRING`:
     Provide a path to a specific .agignore file.

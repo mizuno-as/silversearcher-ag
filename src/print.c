@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 
 #include "ignore.h"
 #include "log.h"
@@ -59,8 +60,7 @@ void print_file_matches(const char *path, const char *buf, const size_t buf_len,
     size_t last_prev_line = 0;
     size_t prev_line_offset = 0;
     size_t cur_match = 0;
-    /* TODO the line below contains a terrible hack */
-    size_t lines_since_last_match = 1000000; /* if I initialize this to INT_MAX it'll overflow */
+    size_t lines_since_last_match = INT_MAX;
     ssize_t lines_to_print = 0;
     size_t last_printed_match = 0;
     char sep = '-';
@@ -91,12 +91,6 @@ void print_file_matches(const char *path, const char *buf, const size_t buf_len,
     context_prev_lines = ag_calloc(sizeof(char *), (opts.before + 1));
 
     for (i = 0; i <= buf_len && (cur_match < matches_len || lines_since_last_match <= opts.after); i++) {
-        if (cur_match < matches_len && i == matches[cur_match].end) {
-            /* We found the end of a match. */
-            cur_match++;
-            in_a_match = FALSE;
-        }
-
         if (cur_match < matches_len && i == matches[cur_match].start) {
             in_a_match = TRUE;
             /* We found the start of a match */
@@ -128,14 +122,19 @@ void print_file_matches(const char *path, const char *buf, const size_t buf_len,
             lines_since_last_match = 0;
         }
 
+        if (cur_match < matches_len && i == matches[cur_match].end) {
+            /* We found the end of a match. */
+            cur_match++;
+            in_a_match = FALSE;
+        }
+
         /* We found the end of a line. */
         if (buf[i] == '\n' && opts.before > 0) {
             if (context_prev_lines[last_prev_line] != NULL) {
                 free(context_prev_lines[last_prev_line]);
             }
             /* We don't want to strcpy the \n */
-            context_prev_lines[last_prev_line] =
-                ag_strndup(&buf[prev_line_offset], i - prev_line_offset);
+            context_prev_lines[last_prev_line] = ag_strndup(&buf[prev_line_offset], i - prev_line_offset);
             last_prev_line = (last_prev_line + 1) % opts.before;
         }
 
@@ -163,6 +162,7 @@ void print_file_matches(const char *path, const char *buf, const size_t buf_len,
                     }
                 } else {
                     print_line_number(line, ':');
+                    int printed_match = FALSE;
                     if (opts.column) {
                         print_column_number(matches, last_printed_match, prev_line_offset, ':');
                     }
@@ -177,8 +177,21 @@ void print_file_matches(const char *path, const char *buf, const size_t buf_len,
                             }
                             printing_a_match = FALSE;
                             last_printed_match++;
+                            printed_match = TRUE;
+                            if (opts.only_matching) {
+                                fputc('\n', out_fd);
+                            }
                         }
                         if (last_printed_match < matches_len && j == matches[last_printed_match].start) {
+                            if (opts.only_matching && printed_match) {
+                                if (opts.print_path == PATH_PRINT_EACH_LINE) {
+                                    print_path(path, ':');
+                                }
+                                print_line_number(line, ':');
+                                if (opts.column) {
+                                    print_column_number(matches, last_printed_match, prev_line_offset, ':');
+                                }
+                            }
                             if (opts.color) {
                                 fprintf(out_fd, "%s", opts.color_match);
                             }
@@ -187,7 +200,7 @@ void print_file_matches(const char *path, const char *buf, const size_t buf_len,
                         /* Don't print the null terminator */
                         if (j < buf_len) {
                             /* if only_matching is set, print only matches and newlines */
-                            if (!opts.only_matching || printing_a_match || buf[j] == '\n') {
+                            if (!opts.only_matching || printing_a_match) {
                                 fputc(buf[j], out_fd);
                             }
                         }
@@ -211,7 +224,7 @@ void print_file_matches(const char *path, const char *buf, const size_t buf_len,
 
             prev_line_offset = i + 1; /* skip the newline */
             line++;
-            if (!in_a_match) {
+            if (!in_a_match && lines_since_last_match < INT_MAX) {
                 lines_since_last_match++;
             }
             /* File doesn't end with a newline. Print one so the output is pretty. */

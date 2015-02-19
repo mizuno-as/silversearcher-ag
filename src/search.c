@@ -96,6 +96,10 @@ void search_buf(const char *buf, const size_t buf_len,
                (pcre_exec(opts.re, opts.re_extra, buf, buf_len, buf_offset, 0, offset_vector, 3)) >= 0) {
             log_debug("Regex match found. File %s, offset %i bytes.", dir_full_path, offset_vector[0]);
             buf_offset = offset_vector[1];
+            if (offset_vector[0] == offset_vector[1]) {
+                ++buf_offset;
+                log_debug("Regex match is of length zero. Advancing offset one byte.");
+            }
 
             /* TODO: copy-pasted from above. FIXME */
             if (matches_len + matches_spare >= matches_size) {
@@ -378,7 +382,8 @@ static int check_symloop_leave(dirkey_t *dirkey) {
 /* TODO: Append matches to some data structure instead of just printing them out.
  * Then ag can have sweet summaries of matches/files scanned/time/etc.
  */
-void search_dir(ignores *ig, const char *base_path, const char *path, const int depth) {
+void search_dir(ignores *ig, const char *base_path, const char *path, const int depth,
+                dev_t original_dev) {
     struct dirent **dir_list = NULL;
     struct dirent *dir = NULL;
     scandir_baton_t scandir_baton;
@@ -429,6 +434,10 @@ void search_dir(ignores *ig, const char *base_path, const char *path, const int 
                 if (opts.print_path == PATH_PRINT_DEFAULT || opts.print_path == PATH_PRINT_DEFAULT_EACH_LINE) {
                     opts.print_path = PATH_PRINT_NOTHING;
                 }
+                /* If we're only searching one file and --only-matching is specified, disable line numbers too. */
+                if (opts.only_matching && opts.print_path == PATH_PRINT_NOTHING) {
+                    opts.print_line_numbers = FALSE;
+                }
             }
             search_file(path);
         } else {
@@ -445,6 +454,19 @@ void search_dir(ignores *ig, const char *base_path, const char *path, const int 
         queue_item = NULL;
         dir = dir_list[i];
         ag_asprintf(&dir_full_path, "%s/%s", path, dir->d_name);
+#ifndef _WIN32
+        if (opts.one_dev) {
+            struct stat s;
+            if (lstat(dir_full_path, &s) != 0) {
+                log_err("Failed to get device information for %s. Skipping...", dir->d_name);
+                goto cleanup;
+            }
+            if (s.st_dev != original_dev) {
+                log_debug("File %s crosses a device boundary (is probably a mount point.) Skipping...", dir->d_name);
+                goto cleanup;
+            }
+        }
+#endif
 
         /* If a link points to a directory then we need to treat it as a directory. */
         if (!opts.follow_symlinks && is_symlink(path, dir)) {
@@ -486,12 +508,13 @@ void search_dir(ignores *ig, const char *base_path, const char *path, const int 
             if (depth < opts.max_search_depth || opts.max_search_depth == -1) {
                 log_debug("Searching dir %s", dir_full_path);
                 ignores *child_ig;
-                // #if defined(__MINGW32__) || defined(__CYGWIN__)
+#ifdef HAVE_DIRENT_DNAMLEN
+                child_ig = init_ignore(ig, dir->d_name, dir->d_namlen);
+#else
                 child_ig = init_ignore(ig, dir->d_name, strlen(dir->d_name));
-                // #else
-                // child_ig = init_ignore(ig, dir->d_name, dir->d_namlen);
-                // #endif
-                search_dir(child_ig, base_path, dir_full_path, depth + 1);
+#endif
+                search_dir(child_ig, base_path, dir_full_path, depth + 1,
+                           original_dev);
                 cleanup_ignore(child_ig);
             } else {
                 if (opts.max_search_depth == DEFAULT_MAX_SEARCH_DEPTH) {

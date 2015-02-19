@@ -9,6 +9,9 @@
 #define SVN_PROP_IGNORE "svn:ignore"
 
 struct ignores {
+    char **extensions; /* File extensions to ignore */
+    size_t extensions_len;
+
     char **names; /* Non-regex ignore lines. Sorted so we can binary search them. */
     size_t names_len;
     char **slash_names; /* Same but starts with a slash */
@@ -42,5 +45,7 @@ void load_ignore_patterns(ignores *ig, const char *path);
 void load_svn_ignore_patterns(ignores *ig, const char *path);
 
 int filename_filter(const char *path, const struct dirent *dir, void *baton);
+
+int is_empty(ignores *ig);
 
 #endif

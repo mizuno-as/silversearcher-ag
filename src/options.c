@@ -43,8 +43,9 @@ Output Options:\n\
      --color-match        Color codes for result match numbers (Default: 30;43)\n\
      --color-path         Color codes for path names (Default: 1;32)\n\
      --column             Print column numbers in results\n\
-  -H --[no]heading        Print file names (Enabled unless searching a single file)\n\
-     --line-numbers       Print line numbers even for streams\n\
+     --[no]filename       Print file names (Enabled unless searching a single file)\n\
+  -H --[no]heading        Print file names before each file's matches\n\
+                          (Enabled by default)\n\
   -C --context [LINES]    Print lines before and after matches (Default: 2)\n\
      --[no]group          Same as --[no]break --[no]heading\n\
   -g PATTERN              Print filenames matching PATTERN\n\
@@ -52,7 +53,8 @@ Output Options:\n\
                           (don't print the matching lines)\n\
   -L --files-without-matches\n\
                           Only print filenames that don't contain matches\n\
-     --no-numbers         Don't print line numbers\n\
+     --[no]numbers        Print line numbers. Default is to omit line numbers\n\
+                          when searching streams\n\
   -o --only-matching      Prints only the matching part of the lines\n\
      --print-long-lines   Print matches on very long lines (Default: >2k characters)\n\
      --passthrough        When searching a stream, print all lines even if they\n\
@@ -77,6 +79,7 @@ Search Options:\n\
                           (literal file/directory names also allowed)\n\
      --ignore-dir NAME    Alias for --ignore for compatibility with ack.\n\
   -m --max-count NUM      Skip the rest of a file after NUM matches (Default: 10,000)\n\
+     --one-device         Don't follow links to other devices.\n\
   -p --path-to-agignore STRING\n\
                           Use .agignore file at STRING\n\
   -Q --literal            Don't parse PATTERN as a regular expression\n\
@@ -124,6 +127,7 @@ void init_options(void) {
     opts.color_path = ag_strdup(color_path);
     opts.color_match = ag_strdup(color_match);
     opts.color_line_number = ag_strdup(color_line_number);
+    opts.use_thread_affinity = TRUE;
 }
 
 void cleanup_options(void) {
@@ -158,7 +162,7 @@ void cleanup_options(void) {
 
 void parse_options(int argc, char **argv, char **base_paths[], char **paths[]) {
     int ch;
-    unsigned int i;
+    size_t i;
     int path_len = 0;
     int useless = 0;
     int group = 1;
@@ -173,17 +177,22 @@ void parse_options(int argc, char **argv, char **base_paths[], char **paths[]) {
     int needs_query = 1;
     struct stat statbuf;
     int rv;
-    unsigned int lang_count;
+    size_t lang_count;
+    size_t lang_num = 0;
 
     size_t longopts_len, full_len;
     option_t *longopts;
     char *lang_regex = NULL;
+    size_t *ext_index = NULL;
+    char *extensions = NULL;
+    size_t num_exts = 0;
 
     init_options();
 
     option_t base_longopts[] = {
         { "ackmate", no_argument, &opts.ackmate, 1 },
         { "ackmate-dir-filter", required_argument, NULL, 0 },
+        { "affinity", no_argument, &opts.use_thread_affinity, 1 },
         { "after", optional_argument, NULL, 'A' },
         { "all-text", no_argument, NULL, 't' },
         { "all-types", no_argument, NULL, 'a' },
@@ -196,9 +205,10 @@ void parse_options(int argc, char **argv, char **base_paths[], char **paths[]) {
         { "color-path", required_argument, NULL, 0 },
         { "column", no_argument, &opts.column, 1 },
         { "context", optional_argument, NULL, 'C' },
-        { "count", no_argument, NULL, 'c'},
+        { "count", no_argument, NULL, 'c' },
         { "debug", no_argument, NULL, 'D' },
         { "depth", required_argument, NULL, 0 },
+        { "filename", no_argument, NULL, 0 },
         { "file-search-regex", required_argument, NULL, 'G' },
         { "files-with-matches", no_argument, NULL, 'l' },
         { "files-without-matches", no_argument, NULL, 'L' },
@@ -211,28 +221,36 @@ void parse_options(int argc, char **argv, char **base_paths[], char **paths[]) {
         { "ignore", required_argument, NULL, 0 },
         { "ignore-case", no_argument, NULL, 'i' },
         { "ignore-dir", required_argument, NULL, 0 },
-        { "invert-match", no_argument, &opts.invert_match, 1 },
+        { "invert-match", no_argument, NULL, 'v' },
+        /* deprecated for --numbers. Remove eventually. */
         { "line-numbers", no_argument, &opts.print_line_numbers, 2 },
         { "list-file-types", no_argument, &list_file_types, 1 },
         { "literal", no_argument, NULL, 'Q' },
         { "match", no_argument, &useless, 0 },
         { "max-count", required_argument, NULL, 'm' },
-        { "no-numbers", no_argument, NULL, 0 },
+        /* "no-" is deprecated. Remove these eventually. */
+        { "no-numbers", no_argument, &opts.print_line_numbers, FALSE },
         { "no-recurse", no_argument, NULL, 'n' },
+        { "noaffinity", no_argument, &opts.use_thread_affinity, 0 },
         { "nobreak", no_argument, &opts.print_break, 0 },
         { "nocolor", no_argument, &opts.color, 0 },
+        { "nofilename", no_argument, NULL, 0 },
         { "nofollow", no_argument, &opts.follow_symlinks, 0 },
         { "nogroup", no_argument, &group, 0 },
         { "noheading", no_argument, &opts.print_path, PATH_PRINT_EACH_LINE },
+        { "nonumbers", no_argument, &opts.print_line_numbers, FALSE },
         { "nopager", no_argument, NULL, 0 },
+        { "norecurse", no_argument, NULL, 'n' },
         { "null", no_argument, NULL, '0' },
+        { "numbers", no_argument, &opts.print_line_numbers, 2 },
         { "only-matching", no_argument, NULL, 'o' },
+        { "one-device", no_argument, &opts.one_dev, 1 },
         { "pager", required_argument, NULL, 0 },
         { "parallel", no_argument, &opts.parallel, 1 },
         { "passthrough", no_argument, &opts.passthrough, 1 },
         { "passthru", no_argument, &opts.passthrough, 1 },
         { "path-to-agignore", required_argument, NULL, 'p' },
-        { "print0", no_argument, NULL, '0'},
+        { "print0", no_argument, NULL, '0' },
         { "print-long-lines", no_argument, &opts.print_long_lines, 1 },
         { "recurse", no_argument, NULL, 'r' },
         { "search-binary", no_argument, &opts.search_binary_files, 1 },
@@ -254,6 +272,8 @@ void parse_options(int argc, char **argv, char **base_paths[], char **paths[]) {
     full_len = (longopts_len + lang_count + 1);
     longopts = ag_malloc(full_len * sizeof(option_t));
     memcpy(longopts, base_longopts, sizeof(base_longopts));
+    ext_index = (size_t *)ag_malloc(sizeof(size_t) * lang_count);
+    memset(ext_index, 0, sizeof(size_t) * lang_count);
 
     for (i = 0; i < lang_count; i++) {
         option_t opt = { langs[i].name, no_argument, NULL, 0 };
@@ -412,6 +432,8 @@ void parse_options(int argc, char **argv, char **base_paths[], char **paths[]) {
                 break;
             case 'v':
                 opts.invert_match = 1;
+                /* Color highlighting doesn't make sense when inverting matches */
+                opts.color = 0;
                 break;
             case 'V':
                 version = 1;
@@ -432,14 +454,19 @@ void parse_options(int argc, char **argv, char **base_paths[], char **paths[]) {
                 } else if (strcmp(longopts[opt_index].name, "depth") == 0) {
                     opts.max_search_depth = atoi(optarg);
                     break;
-                } else if (strcmp(longopts[opt_index].name, "no-numbers") == 0) {
-                    opts.print_line_numbers = FALSE;
+                } else if (strcmp(longopts[opt_index].name, "filename") == 0) {
+                    opts.print_path = PATH_PRINT_DEFAULT;
+                    opts.print_line_numbers = TRUE;
                     break;
                 } else if (strcmp(longopts[opt_index].name, "ignore-dir") == 0) {
                     add_ignore_pattern(root_ignores, optarg);
                     break;
                 } else if (strcmp(longopts[opt_index].name, "ignore") == 0) {
                     add_ignore_pattern(root_ignores, optarg);
+                    break;
+                } else if (strcmp(longopts[opt_index].name, "nofilename") == 0) {
+                    opts.print_path = PATH_PRINT_NOTHING;
+                    opts.print_line_numbers = FALSE;
                     break;
                 } else if (strcmp(longopts[opt_index].name, "nopager") == 0) {
                     out_fd = stdout;
@@ -475,14 +502,11 @@ void parse_options(int argc, char **argv, char **base_paths[], char **paths[]) {
 
                 for (i = 0; i < lang_count; i++) {
                     if (strcmp(longopts[opt_index].name, langs[i].name) == 0) {
-                        lang_regex = make_lang_regex(langs[i].extensions);
-                        compile_study(&opts.file_search_regex, &opts.file_search_regex_extra, lang_regex, 0, 0);
+                        ext_index[lang_num++] = i;
                         break;
                     }
                 }
-                if (lang_regex) {
-                    free(lang_regex);
-                    lang_regex = NULL;
+                if (i != lang_count) {
                     break;
                 }
 
@@ -493,6 +517,20 @@ void parse_options(int argc, char **argv, char **base_paths[], char **paths[]) {
         }
     }
 
+
+    if (ext_index[0]) {
+        num_exts = combine_file_extensions(ext_index, lang_num, &extensions);
+        lang_regex = make_lang_regex(extensions, num_exts);
+        compile_study(&opts.file_search_regex, &opts.file_search_regex_extra, lang_regex, 0, 0);
+    }
+
+    if (extensions) {
+        free(extensions);
+    }
+    free(ext_index);
+    if (lang_regex) {
+        free(lang_regex);
+    }
     free(longopts);
 
     argc -= optind;
@@ -521,7 +559,7 @@ void parse_options(int argc, char **argv, char **base_paths[], char **paths[]) {
     }
 
     if (list_file_types) {
-        unsigned int lang_index;
+        size_t lang_index;
         printf("The following file types are supported:\n");
         for (lang_index = 0; lang_index < lang_count; lang_index++) {
             printf("  --%s\n    ", langs[lang_index].name);
@@ -641,7 +679,7 @@ skip_group:
     if (argc > 0) {
         *paths = ag_calloc(sizeof(char *), argc + 1);
         *base_paths = ag_calloc(sizeof(char *), argc + 1);
-        for (i = 0; i < (unsigned int)argc; i++) {
+        for (i = 0; i < (size_t)argc; i++) {
             path = ag_strdup(argv[i]);
             path_len = strlen(path);
             /* kill trailing slash */
