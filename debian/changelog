@@ -1,3 +1,9 @@
+silversearcher-ag (0.29.1-1) unstable; urgency=medium
+
+  * new upstream release
+
+ -- Hajime MIZUNO <mizuno-as@ubuntu.com>  Thu, 19 Feb 2015 15:17:43 +0900
+
 silversearcher-ag (0.28.0-1) unstable; urgency=medium
 
   * new upstream release
