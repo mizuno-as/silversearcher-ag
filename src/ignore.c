@@ -37,8 +37,14 @@ const char *ignore_pattern_files[] = {
     NULL
 };
 
+int is_empty(ignores *ig) {
+    return (ig->extensions_len + ig->names_len + ig->slash_names_len + ig->regexes_len + ig->slash_regexes_len == 0);
+};
+
 ignores *init_ignore(ignores *parent, const char *dirname, const size_t dirname_len) {
     ignores *ig = ag_malloc(sizeof(ignores));
+    ig->extensions = NULL;
+    ig->extensions_len = 0;
     ig->names = NULL;
     ig->names_len = 0;
     ig->slash_names = NULL;
@@ -47,9 +53,15 @@ ignores *init_ignore(ignores *parent, const char *dirname, const size_t dirname_
     ig->regexes_len = 0;
     ig->slash_regexes = NULL;
     ig->slash_regexes_len = 0;
-    ig->parent = parent;
     ig->dirname = dirname;
     ig->dirname_len = dirname_len;
+
+    if (parent && is_empty(parent) && parent->parent) {
+        ig->parent = parent->parent;
+    } else {
+        ig->parent = parent;
+    }
+
     if (parent && parent->abs_path_len > 0) {
         ag_asprintf(&(ig->abs_path), "%s/%s", parent->abs_path, dirname);
         ig->abs_path_len = parent->abs_path_len + 1 + dirname_len;
@@ -65,26 +77,18 @@ ignores *init_ignore(ignores *parent, const char *dirname, const size_t dirname_
 }
 
 void cleanup_ignore(ignores *ig) {
-    size_t i;
-
-    if (ig) {
-        if (ig->regexes) {
-            for (i = 0; i < ig->regexes_len; i++) {
-                free(ig->regexes[i]);
-            }
-            free(ig->regexes);
-        }
-        if (ig->names) {
-            for (i = 0; i < ig->names_len; i++) {
-                free(ig->names[i]);
-            }
-            free(ig->names);
-        }
-        if (ig->abs_path) {
-            free(ig->abs_path);
-        }
-        free(ig);
+    if (ig == NULL) {
+        return;
     }
+    free_strings(ig->extensions, ig->extensions_len);
+    free_strings(ig->names, ig->names_len);
+    free_strings(ig->slash_names, ig->slash_names_len);
+    free_strings(ig->regexes, ig->regexes_len);
+    free_strings(ig->slash_regexes, ig->slash_regexes_len);
+    if (ig->abs_path) {
+        free(ig->abs_path);
+    }
+    free(ig);
 }
 
 void add_ignore_pattern(ignores *ig, const char *pattern) {
@@ -111,7 +115,11 @@ void add_ignore_pattern(ignores *ig, const char *pattern) {
     char ***patterns_p;
     size_t *patterns_len;
     if (is_fnmatch(pattern)) {
-        if (pattern[0] == '/') {
+        if (pattern[0] == '*' && pattern[1] == '.' && !(is_fnmatch(pattern + 2))) {
+            patterns_p = &(ig->extensions);
+            patterns_len = &(ig->extensions_len);
+            pattern += 2;
+        } else if (pattern[0] == '/') {
             patterns_p = &(ig->slash_regexes);
             patterns_len = &(ig->slash_regexes_len);
             pattern++;
@@ -147,7 +155,7 @@ void add_ignore_pattern(ignores *ig, const char *pattern) {
     }
     patterns[i] = ag_strndup(pattern, pattern_len);
     log_debug("added ignore pattern %s to %s", pattern,
-            ig == root_ignores ? "root ignores" : ig->abs_path);
+              ig == root_ignores ? "root ignores" : ig->abs_path);
 }
 
 /* For loading git/hg ignore patterns */
@@ -256,15 +264,11 @@ static int ackmate_dir_match(const char *dir_name) {
     return pcre_exec(opts.ackmate_dir_filter, NULL, dir_name, strlen(dir_name), 0, 0, NULL, 0);
 }
 
+/* This is the hottest code in Ag. 10-15% of all execution time is spent here */
 static int path_ignore_search(const ignores *ig, const char *path, const char *filename) {
     char *temp;
-
     size_t i;
     int match_pos;
-
-    if (strncmp(filename, "./", 2) == 0) {
-        filename++;
-    }
 
     match_pos = binary_search(filename, ig->names, 0, ig->names_len);
     if (match_pos >= 0) {
@@ -273,7 +277,6 @@ static int path_ignore_search(const ignores *ig, const char *path, const char *f
     }
 
     ag_asprintf(&temp, "%s/%s", path[0] == '.' ? path + 1 : path, filename);
-    log_debug("temp: %s abs path: %s", temp, ig->abs_path);
 
     if (strncmp(temp, ig->abs_path, ig->abs_path_len) == 0) {
         char *slash_filename = temp + ig->abs_path_len;
@@ -326,8 +329,6 @@ static int path_ignore_search(const ignores *ig, const char *path, const char *f
         log_debug("pattern %s doesn't match file %s", ig->regexes[i], filename);
     }
 
-    log_debug("file %s not ignored", filename);
-
     int rv = ackmate_dir_match(temp);
     free(temp);
     return rv;
@@ -337,7 +338,11 @@ static int path_ignore_search(const ignores *ig, const char *path, const char *f
 int filename_filter(const char *path, const struct dirent *dir, void *baton) {
     const char *filename = dir->d_name;
     /* TODO: don't call strlen on filename every time we call filename_filter() */
+#ifdef HAVE_DIRENT_DNAMLEN
+    size_t filename_len = dir->d_namlen;
+#else
     size_t filename_len = strlen(filename);
+#endif
     size_t i;
     scandir_baton_t *scandir_baton = (scandir_baton_t *)baton;
     const ignores *ig = scandir_baton->ig;
@@ -345,6 +350,16 @@ int filename_filter(const char *path, const struct dirent *dir, void *baton) {
     const size_t base_path_len = scandir_baton->base_path_len;
     const char *path_start = path;
     char *temp;
+
+    if (!opts.search_hidden_files && filename[0] == '.') {
+        return 0;
+    }
+
+    for (i = 0; evil_hardcoded_ignore_files[i] != NULL; i++) {
+        if (strcmp(filename, evil_hardcoded_ignore_files[i]) == 0) {
+            return 0;
+        }
+    }
 
     if (!opts.follow_symlinks && is_symlink(path, dir)) {
         log_debug("File %s ignored becaused it's a symlink", dir->d_name);
@@ -356,15 +371,6 @@ int filename_filter(const char *path, const struct dirent *dir, void *baton) {
         return 0;
     }
 
-    for (i = 0; evil_hardcoded_ignore_files[i] != NULL; i++) {
-        if (strcmp(filename, evil_hardcoded_ignore_files[i]) == 0) {
-            return 0;
-        }
-    }
-
-    if (!opts.search_hidden_files && filename[0] == '.') {
-        return 0;
-    }
     if (opts.search_all_files && !opts.path_to_agignore) {
         return 1;
     }
@@ -375,7 +381,31 @@ int filename_filter(const char *path, const struct dirent *dir, void *baton) {
     }
     log_debug("path_start %s filename %s", path_start, filename);
 
+    const char *extension = NULL;
+    for (i = filename_len - 1; i > 0; i--) {
+        if (filename[i] == '.') {
+            extension = filename + i + 1;
+            break;
+        }
+    }
+    if (extension && extension[0] == '\0') {
+        extension = NULL;
+    }
+
     while (ig != NULL) {
+        if (strncmp(filename, "./", 2) == 0) {
+            filename++;
+            filename_len--;
+        }
+
+        if (extension) {
+            int match_pos = binary_search(extension, ig->extensions, 0, ig->extensions_len);
+            if (match_pos >= 0) {
+                log_debug("file %s ignored because name matches extension %s", filename, ig->extensions[match_pos]);
+                return 0;
+            }
+        }
+
         if (path_ignore_search(ig, path_start, filename)) {
             return 0;
         }
@@ -391,5 +421,6 @@ int filename_filter(const char *path, const struct dirent *dir, void *baton) {
         ig = ig->parent;
     }
 
+    log_debug("%s not ignored", filename);
     return 1;
 }

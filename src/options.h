@@ -50,6 +50,7 @@ typedef struct {
     int literal_ends_wordchar;
     size_t max_matches_per_file;
     int max_search_depth;
+    int one_dev;
     int only_matching;
     char path_sep;
     char *path_to_agignore;
@@ -78,6 +79,7 @@ typedef struct {
     char *pager;
     int paths_len;
     int parallel;
+    int use_thread_affinity;
     int vimgrep;
     int word_regexp;
     int workers;

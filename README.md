@@ -59,7 +59,7 @@ or
         yum install the_silver_searcher
 * RHEL7+
 
-        rpm -Uvh http://dl.fedoraproject.org/pub/epel/beta/7/x86_64/epel-release-7-0.2.noarch.rpm
+        rpm -Uvh http://download.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
         yum install the_silver_searcher
 * Gentoo
 
@@ -85,6 +85,8 @@ or
 
 
 ## Building from source
+
+### Building master
 
 1. Install dependencies (Automake, pkg-config, PCRE, LZMA):
     * OS X:
@@ -116,6 +118,17 @@ or
         sudo make install
 
 
+### Building a release tarball
+
+Building release tarballs requires the same dependencies, except for automake and pkg-config. Once you've installed the dependencies, just run:
+
+    ./configure
+    make
+    make install
+
+You may need to use `sudo` or run as root for the make install.
+
+
 ## Editor Integration
 
 ### Vim
@@ -143,12 +156,6 @@ You can use [ag.el][] as an Emacs fronted to Ag.
 ### TextMate
 
 TextMate users can use Ag with [my fork](https://github.com/ggreer/AckMate) of the popular AckMate plugin, which lets you use both Ack and Ag for searching. If you already have AckMate you just want to replace Ack with Ag, move or delete `"~/Library/Application Support/TextMate/PlugIns/AckMate.tmplugin/Contents/Resources/ackmate_ack"` and run `ln -s /usr/local/bin/ag "~/Library/Application Support/TextMate/PlugIns/AckMate.tmplugin/Contents/Resources/ackmate_ack"`
-
-
-## Contributing
-
-I like when people send pull requests. It validates my existence. If you want to help out, check the [issue list](https://github.com/ggreer/the_silver_searcher/issues?sort=updated&state=open) or search the codebase for `TODO`. Don't worry if you lack experience writing C. If I think a pull request isn't ready to be merged, I'll give feedback in comments. Once everything looks good, I'll comment on your pull request with a cool animated gif and hit the merge button.
-
 
 ## Other stuff you might like
 
