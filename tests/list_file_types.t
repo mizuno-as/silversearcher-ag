@@ -25,7 +25,7 @@ Language types are output:
         .cfc  .cfm  .cfml
   
     --clojure
-        .clj  .cljs  .cljx
+        .clj  .cljs  .cljc  .cljx
   
     --coffee
         .coffee
@@ -42,6 +42,9 @@ Language types are output:
     --delphi
         .pas  .int  .dfm  .nfm  .dof  .dpk  .dproj  .groupproj  .bdsgroup  .bdsproj
   
+    --ebuild
+        .ebuild  .eclass
+  
     --elisp
         .el
   
@@ -50,6 +53,9 @@ Language types are output:
   
     --fortran
         .f  .f77  .f90  .f95  .f03  .for  .ftn  .fpp
+  
+    --fsharp
+        .fs  .fsi  .fsx
   
     --gettext
         .po  .pot  .mo
@@ -82,7 +88,7 @@ Language types are output:
         .java  .properties
   
     --js
-        .js
+        .js  .jsx
   
     --json
         .json
@@ -117,8 +123,14 @@ Language types are output:
     --matlab
         .m
   
+    --mathematica
+        .m  .wl
+  
     --mercury
         .m  .moo
+  
+    --nim
+        .nim
   
     --objc
         .m  .h
@@ -141,8 +153,14 @@ Language types are output:
     --php
         .php  .phpt  .php3  .php4  .php5  .phtml
   
+    --pike
+        .pike  .pmod
+  
     --plone
         .pt  .cpt  .metadata  .cpy  .py
+  
+    --puppet
+        .pp
   
     --python
         .py
@@ -152,6 +170,9 @@ Language types are output:
   
     --rs
         .rs
+  
+    --r
+        .R  .Rmd  .Rnw  .Rtex  .Rrst
   
     --ruby
         .rb  .rhtml  .rjs  .rxml  .erb  .rake  .spec
@@ -201,6 +222,9 @@ Language types are output:
     --vb
         .bas  .cls  .frm  .ctl  .vb  .resx
   
+    --velocity
+        .vm
+  
     --verilog
         .v  .vh  .sv
   
@@ -209,6 +233,12 @@ Language types are output:
   
     --vim
         .vim
+  
+    --wsdl
+        .wsdl
+  
+    --wadl
+        .wadl
   
     --xml
         .xml  .dtd  .xsl  .xslt  .ent

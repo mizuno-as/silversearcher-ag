@@ -337,7 +337,7 @@ static int path_ignore_search(const ignores *ig, const char *path, const char *f
 /* This function is REALLY HOT. It gets called for every file */
 int filename_filter(const char *path, const struct dirent *dir, void *baton) {
     const char *filename = dir->d_name;
-    /* TODO: don't call strlen on filename every time we call filename_filter() */
+/* TODO: don't call strlen on filename every time we call filename_filter() */
 #ifdef HAVE_DIRENT_DNAMLEN
     size_t filename_len = dir->d_namlen;
 #else
@@ -381,15 +381,15 @@ int filename_filter(const char *path, const struct dirent *dir, void *baton) {
     }
     log_debug("path_start %s filename %s", path_start, filename);
 
-    const char *extension = NULL;
-    for (i = filename_len - 1; i > 0; i--) {
-        if (filename[i] == '.') {
-            extension = filename + i + 1;
-            break;
+    const char *extension = strrchr(filename, '.');
+    if (extension) {
+        if (extension[1]) {
+            // The dot is not the last character, extension starts at the next one
+            ++extension;
+        } else {
+            // No extension
+            extension = NULL;
         }
-    }
-    if (extension && extension[0] == '\0') {
-        extension = NULL;
     }
 
     while (ig != NULL) {

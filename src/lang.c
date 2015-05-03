@@ -11,15 +11,17 @@ lang_spec_t langs[] = {
     { "batch", { "bat", "cmd" } },
     { "cc", { "c", "h", "xs" } },
     { "cfmx", { "cfc", "cfm", "cfml" } },
-    { "clojure", { "clj", "cljs", "cljx" } },
+    { "clojure", { "clj", "cljs", "cljc", "cljx" } },
     { "coffee", { "coffee" } },
     { "cpp", { "cpp", "cc", "C", "cxx", "m", "hpp", "hh", "h", "H", "hxx" } },
     { "csharp", { "cs" } },
     { "css", { "css" } },
     { "delphi", { "pas", "int", "dfm", "nfm", "dof", "dpk", "dproj", "groupproj", "bdsgroup", "bdsproj" } },
+    { "ebuild", { "ebuild", "eclass" } },
     { "elisp", { "el" } },
     { "erlang", { "erl", "hrl" } },
     { "fortran", { "f", "f77", "f90", "f95", "f03", "for", "ftn", "fpp" } },
+    { "fsharp", { "fs", "fsi", "fsx" } },
     { "gettext", { "po", "pot", "mo" } },
     { "go", { "go" } },
     { "groovy", { "groovy", "gtmpl", "gpp", "grunit" } },
@@ -30,7 +32,7 @@ lang_spec_t langs[] = {
     { "ini", { "ini" } },
     { "jade", { "jade" } },
     { "java", { "java", "properties" } },
-    { "js", { "js" } },
+    { "js", { "js", "jsx" } },
     { "json", { "json" } },
     { "jsp", { "jsp", "jspx", "jhtm", "jhtml" } },
     { "less", { "less" } },
@@ -42,7 +44,9 @@ lang_spec_t langs[] = {
     { "markdown", { "markdown", "mdown", "mdwn", "mkdn", "mkd", "md" } },
     { "mason", { "mas", "mhtml", "mpl", "mtxt" } },
     { "matlab", { "m" } },
+    { "mathematica", { "m", "wl" } },
     { "mercury", { "m", "moo" } },
+    { "nim", { "nim" } },
     { "objc", { "m", "h" } },
     { "objcpp", { "mm", "h" } },
     { "ocaml", { "ml", "mli", "mll", "mly" } },
@@ -50,10 +54,13 @@ lang_spec_t langs[] = {
     { "parrot", { "pir", "pasm", "pmc", "ops", "pod", "pg", "tg" } },
     { "perl", { "pl", "pm", "pm6", "pod", "t" } },
     { "php", { "php", "phpt", "php3", "php4", "php5", "phtml" } },
+    { "pike", { "pike", "pmod" } },
     { "plone", { "pt", "cpt", "metadata", "cpy", "py" } },
+    { "puppet", { "pp" } },
     { "python", { "py" } },
     { "rake", { "Rakefiles" } },
     { "rs", { "rs" } },
+    { "r", { "R", "Rmd", "Rnw", "Rtex", "Rrst" } },
     { "ruby", { "rb", "rhtml", "rjs", "rxml", "erb", "rake", "spec" } },
     { "rust", { "rs" } },
     { "salt", { "sls" } },
@@ -70,9 +77,12 @@ lang_spec_t langs[] = {
     { "tt", { "tt", "tt2", "ttml" } },
     { "vala", { "vala", "vapi" } },
     { "vb", { "bas", "cls", "frm", "ctl", "vb", "resx" } },
+    { "velocity", { "vm" } },
     { "verilog", { "v", "vh", "sv" } },
     { "vhdl", { "vhd", "vhdl" } },
     { "vim", { "vim" } },
+    { "wsdl", { "wsdl" } },
+    { "wadl", { "wadl" } },
     { "xml", { "xml", "dtd", "xsl", "xslt", "ent" } },
     { "yaml", { "yaml", "yml" } }
 };
@@ -114,7 +124,7 @@ char *make_lang_regex(char *ext_array, size_t num_exts) {
 }
 
 size_t combine_file_extensions(size_t *extension_index, size_t len, char **exts) {
-    /* Keep it fixed as 100 for the reason that if you have more than 100 
+    /* Keep it fixed as 100 for the reason that if you have more than 100
      * file types to search, you'd better search all the files.
      * */
     size_t ext_capacity = 100;
