@@ -14,8 +14,9 @@
 #include "lang.h"
 #include "log.h"
 #include "util.h"
+#include "print.h"
 
-const char *color_line_number = "\033[1;33m"; /* yellow with black background */
+const char *color_line_number = "\033[1;33m"; /* bold yellow */
 const char *color_match = "\033[30;43m";      /* black with yellow background */
 const char *color_path = "\033[1;32m";        /* bold green */
 
@@ -42,6 +43,14 @@ Output Options:\n\
      --color-line-number  Color codes for line numbers (Default: 1;33)\n\
      --color-match        Color codes for result match numbers (Default: 30;43)\n\
      --color-path         Color codes for path names (Default: 1;32)\n\
+");
+#ifdef _WIN32
+    printf("\
+     --color-win-ansi     Use ansi colors on Windows even where we can use native\n\
+                          (pager/pipe colors are ansi regardless) (Default: off)\n\
+");
+#endif
+    printf("\
      --column             Print column numbers in results\n\
      --[no]filename       Print file names (Enabled unless searching a single file)\n\
   -H --[no]heading        Print file names before each file's matches\n\
@@ -106,17 +115,30 @@ For a list of supported file types run:\n\
 }
 
 void print_version(void) {
-    printf("ag version %s\n", PACKAGE_VERSION);
+    char jit = '-';
+    char lzma = '-';
+    char zlib = '-';
+
+#ifdef USE_PCRE_JIT
+    jit = '+';
+#endif
+#ifdef HAVE_LZMA_H
+    lzma = '+';
+#endif
+#ifdef HAVE_ZLIB_H
+    zlib = '+';
+#endif
+
+    printf("ag version %s\n\n", PACKAGE_VERSION);
+    printf("Features:\n");
+    printf("  %cjit %clzma %czlib\n", jit, lzma, zlib);
 }
 
 void init_options(void) {
     memset(&opts, 0, sizeof(opts));
     opts.casing = CASE_DEFAULT;
-#ifdef _WIN32
-    opts.color = (getenv("ANSICON") || getenv("CMDER_ROOT")) ? TRUE : FALSE;
-#else
     opts.color = TRUE;
-#endif
+    opts.color_win_ansi = FALSE;
     opts.max_matches_per_file = 0;
     opts.max_search_depth = DEFAULT_MAX_SEARCH_DEPTH;
     opts.path_sep = '\n';
@@ -203,6 +225,7 @@ void parse_options(int argc, char **argv, char **base_paths[], char **paths[]) {
         { "color-line-number", required_argument, NULL, 0 },
         { "color-match", required_argument, NULL, 0 },
         { "color-path", required_argument, NULL, 0 },
+        { "color-win-ansi", no_argument, &opts.color_win_ansi, TRUE },
         { "column", no_argument, &opts.column, 1 },
         { "context", optional_argument, NULL, 'C' },
         { "count", no_argument, NULL, 'c' },
@@ -279,7 +302,7 @@ void parse_options(int argc, char **argv, char **base_paths[], char **paths[]) {
         option_t opt = { langs[i].name, no_argument, NULL, 0 };
         longopts[i + longopts_len] = opt;
     }
-    longopts[full_len - 1] = (option_t) { NULL, 0, NULL, 0 };
+    longopts[full_len - 1] = (option_t){ NULL, 0, NULL, 0 };
 
     if (argc < 2) {
         usage();
@@ -631,18 +654,15 @@ void parse_options(int argc, char **argv, char **base_paths[], char **paths[]) {
         opts.search_stream = 0;
     }
 
-    if (opts.print_path != PATH_PRINT_DEFAULT || opts.print_break == 0) {
-        goto skip_group;
+    if (!(opts.print_path != PATH_PRINT_DEFAULT || opts.print_break == 0)) {
+        if (group) {
+            opts.print_break = 1;
+        } else {
+            opts.print_path = PATH_PRINT_DEFAULT_EACH_LINE;
+            opts.print_break = 0;
+        }
     }
 
-    if (group) {
-        opts.print_break = 1;
-    } else {
-        opts.print_path = PATH_PRINT_DEFAULT_EACH_LINE;
-        opts.print_break = 0;
-    }
-
-skip_group:
     if (opts.search_stream) {
         opts.print_break = 0;
         opts.print_path = PATH_PRINT_NOTHING;
@@ -703,4 +723,8 @@ skip_group:
     }
     (*paths)[i] = NULL;
     (*base_paths)[i] = NULL;
+
+#ifdef _WIN32
+    windows_use_ansi(opts.color_win_ansi);
+#endif
 }

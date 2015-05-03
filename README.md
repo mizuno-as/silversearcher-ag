@@ -6,6 +6,8 @@ A code searching tool similar to `ack`, with a focus on speed.
 
 [![Floobits Status](https://floobits.com/ggreer/ag.png)](https://floobits.com/ggreer/ag/redirect)
 
+[![#ag on Freenode](http://img.shields.io/Freenode/%23ag.png)](https://webchat.freenode.net/?channels=ag)
+
 Do you know C? I invite you to pair with me to [help me get to Ag 1.0](http://geoff.greer.fm/2014/10/13/help-me-get-to-ag-10/).
 
 
@@ -149,9 +151,10 @@ There's also a fork of ack.vim tailored for use with Ag: [ag.vim][]
 
 ### Emacs
 
-You can use [ag.el][] as an Emacs fronted to Ag.
+You can use [ag.el][] as an Emacs fronted to Ag. See also: [helm-ag].
 
 [ag.el]: https://github.com/Wilfred/ag.el
+[helm-ag]: https://github.com/syohex/emacs-helm-ag
 
 ### TextMate
 
