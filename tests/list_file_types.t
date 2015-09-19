@@ -28,7 +28,7 @@ Language types are output:
         .clj  .cljs  .cljc  .cljx
   
     --coffee
-        .coffee
+        .coffee  .cjsx
   
     --cpp
         .cpp  .cc  .C  .cxx  .m  .hpp  .hh  .h  .H  .hxx
@@ -47,6 +47,9 @@ Language types are output:
   
     --elisp
         .el
+  
+    --elixir
+        .ex  .exs
   
     --erlang
         .erl  .hrl
@@ -114,6 +117,9 @@ Language types are output:
     --make
         .Makefiles  .mk  .mak
   
+    --mako
+        .mako
+  
     --markdown
         .markdown  .mdown  .mdwn  .mkdn  .mkd  .md
   
@@ -165,6 +171,9 @@ Language types are output:
     --python
         .py
   
+    --racket
+        .rkt  .ss  .scm
+  
     --rake
         .Rakefiles
   
@@ -197,6 +206,9 @@ Language types are output:
   
     --smalltalk
         .st
+  
+    --sml
+        .sml  .fun  .mlb  .sig
   
     --sql
         .sql  .ctl
