@@ -12,5 +12,5 @@ override_dh_auto_test:
 
 override_dh_install:
 	mv  $(CURDIR)/debian/silversearcher-ag/usr/share/the_silver_searcher/completions/ag.bashcomp.sh \
-            $(CURDIR)/debian/silversearcher-ag/etc/bash_completion.d/ag
+            $(CURDIR)/debian/silversearcher-ag/usr/share/bash-completion/completions/ag
 	rm -rf $(CURDIR)/debian/silversearcher-ag/usr/share/the_silver_searcher

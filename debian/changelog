@@ -1,6 +1,11 @@
 silversearcher-ag (0.31.0-1) unstable; urgency=medium
 
   * new upstream release
+  * debian/dirs,rules
+    - bash completion script install to
+      /usr/share/bash-completion/completions/
+  * add debian/silversearcher-ag.{preinst,postinst,postrm}
+    - remove obsolete bash completion script
 
  -- Hajime Mizuno <mizuno-as@ubuntu.com>  Sat, 19 Sep 2015 23:43:23 +0900
 
