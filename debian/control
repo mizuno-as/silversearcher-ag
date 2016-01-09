@@ -9,6 +9,7 @@ Homepage: https://github.com/ggreer/the_silver_searcher
 Package: silversearcher-ag
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
+Conflicts: python-ase (<< 3.8.1.3440)
 Description: very fast grep-like program, alternative to ack-grep
  The Silver Searcher is grep-like program implemented by C.
  An attempt to make something better than ack-grep.
