@@ -1,3 +1,9 @@
+silversearcher-ag (0.32.0-1) unstable; urgency=medium
+
+  * new upstream release
+
+ -- Hajime Mizuno <mizuno-as@ubuntu.com>  Sun, 29 May 2016 00:25:16 +0900
+
 silversearcher-ag (0.31.0-2) unstable; urgency=medium
 
   * add "Conflicts: python-ase (<< 3.8.1.3440)" to avoid install failure
