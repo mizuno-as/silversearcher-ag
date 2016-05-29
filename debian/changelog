@@ -1,6 +1,8 @@
 silversearcher-ag (0.32.0-1) unstable; urgency=medium
 
   * new upstream release
+  * debian/control
+    - set Standards-Version: 3.9.8.
 
  -- Hajime Mizuno <mizuno-as@ubuntu.com>  Sun, 29 May 2016 00:25:16 +0900
 

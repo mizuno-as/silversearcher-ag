@@ -3,7 +3,7 @@ Section: utils
 Priority: extra
 Maintainer: Hajime Mizuno <mizuno-as@ubuntu.com>
 Build-Depends: debhelper (>= 9.0.0), dh-autoreconf, pkg-config, libpcre3-dev, zlib1g-dev, liblzma-dev
-Standards-Version: 3.9.6
+Standards-Version: 3.9.8
 Homepage: https://github.com/ggreer/the_silver_searcher
 
 Package: silversearcher-ag
