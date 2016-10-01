@@ -38,7 +38,7 @@ void search_buf(const char *buf, const size_t buf_len,
 
     if (!opts.literal && opts.query_len == 1 && opts.query[0] == '.') {
         matches_size = 1;
-        matches = ag_malloc(matches_size * sizeof(match_t));
+        matches = matches == NULL ? ag_malloc(matches_size * sizeof(match_t)) : matches;
         matches[0].start = 0;
         matches[0].end = buf_len;
         matches_len = 1;
@@ -286,16 +286,25 @@ void search_file(const char *file_full_path) {
         goto cleanup;
     }
 #else
-    buf = mmap(0, f_len, PROT_READ, MAP_SHARED, fd, 0);
-    if (buf == MAP_FAILED) {
-        log_err("File %s failed to load: %s.", file_full_path, strerror(errno));
-        goto cleanup;
-    }
+
+    if (opts.mmap) {
+        buf = mmap(0, f_len, PROT_READ, MAP_PRIVATE, fd, 0);
+        if (buf == MAP_FAILED) {
+            log_err("File %s failed to load: %s.", file_full_path, strerror(errno));
+            goto cleanup;
+        }
 #if HAVE_MADVISE
-    madvise(buf, f_len, MADV_SEQUENTIAL);
+        madvise(buf, f_len, MADV_SEQUENTIAL);
 #elif HAVE_POSIX_FADVISE
-    posix_fadvise(fd, 0, f_len, POSIX_MADV_SEQUENTIAL);
+        posix_fadvise(fd, 0, f_len, POSIX_MADV_SEQUENTIAL);
 #endif
+    } else {
+        buf = ag_malloc(f_len);
+        size_t bytes_read = read(fd, buf, f_len);
+        if ((off_t)bytes_read != f_len) {
+            die("expected to read %u bytes but read %u", f_len, bytes_read);
+        }
+    }
 #endif
 
     if (opts.search_zip_files) {
@@ -321,7 +330,11 @@ cleanup:
 #ifdef _WIN32
         UnmapViewOfFile(buf);
 #else
-        munmap(buf, f_len);
+        if (opts.mmap) {
+            munmap(buf, f_len);
+        } else {
+            free(buf);
+        }
 #endif
     }
     if (fd != -1) {
@@ -435,8 +448,8 @@ void search_dir(ignores *ig, const char *base_path, const char *path, const int 
         return;
     }
 
-    /* find agignore/gitignore/hgignore/etc files to load ignore patterns from */
-    for (i = 0; opts.skip_vcs_ignores ? (i == 0) : (ignore_pattern_files[i] != NULL); i++) {
+    /* find .*ignore files to load ignore patterns from */
+    for (i = 0; opts.skip_vcs_ignores ? (i <= 1) : (ignore_pattern_files[i] != NULL); i++) {
         ignore_file = ignore_pattern_files[i];
         ag_asprintf(&dir_full_path, "%s/%s", path, ignore_file);
         if (strcmp(SVN_DIR, ignore_file) == 0) {
@@ -448,8 +461,9 @@ void search_dir(ignores *ig, const char *base_path, const char *path, const int 
         dir_full_path = NULL;
     }
 
-    if (opts.path_to_agignore) {
-        load_ignore_patterns(ig, opts.path_to_agignore);
+    /* TODO: this is extremely wasteful */
+    if (opts.path_to_ignore) {
+        load_ignore_patterns(ig, opts.path_to_ignore);
     }
 
     scandir_baton.ig = ig;

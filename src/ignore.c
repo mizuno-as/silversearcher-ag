@@ -1,5 +1,6 @@
 #include <ctype.h>
 #include <dirent.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -27,9 +28,11 @@ const char *evil_hardcoded_ignore_files[] = {
     NULL
 };
 
-/* Warning: changing the first string will break skip_vcs_ignores. */
+/* Warning: changing the first two strings will break skip_vcs_ignores. */
 const char *ignore_pattern_files[] = {
+    /* Warning: .agignore will one day be removed in favor of .ignore */
     ".agignore",
+    ".ignore",
     ".gitignore",
     ".git/info/exclude",
     ".hgignore",
@@ -208,6 +211,10 @@ void load_svn_ignore_patterns(ignores *ig, const char *path) {
     int matches;
 
     while (fscanf(fp, "K %zu\n", &key_len) == 1) {
+        if (key_len >= INT_MAX) {
+            log_debug("Unable to parse svnignore file %s: key is absurdly long.", dir_prop_base);
+            goto cleanup;
+        }
         key = ag_realloc(key, key_len + 1);
         bytes_read = fread(key, 1, key_len, fp);
         key[key_len] = '\0';
@@ -220,7 +227,11 @@ void load_svn_ignore_patterns(ignores *ig, const char *path) {
         if (strncmp(SVN_PROP_IGNORE, key, bytes_read) != 0) {
             log_debug("key is %s, not %s. skipping %u bytes", key, SVN_PROP_IGNORE, entry_len);
             /* Not the key we care about. fseek and repeat */
-            fseek(fp, entry_len + 1, SEEK_CUR); /* +1 to account for newline. yes I know this is hacky */
+            int rv = fseek(fp, entry_len + 1, SEEK_CUR); /* +1 to account for newline. yes I know this is hacky */
+            if (rv == -1) {
+                log_debug("Skipping svnignore file %s: fseek() error.", dir_prop_base);
+                goto cleanup;
+            }
             continue;
         }
         /* Aww yeah. Time to ignore stuff */
@@ -358,7 +369,7 @@ int filename_filter(const char *path, const struct dirent *dir, void *baton) {
         return 0;
     }
 
-    if (opts.search_all_files && !opts.path_to_agignore) {
+    if (opts.search_all_files && !opts.path_to_ignore) {
         return 1;
     }
 
@@ -384,20 +395,23 @@ int filename_filter(const char *path, const struct dirent *dir, void *baton) {
         }
     }
 
-/* TODO: don't call strlen on filename every time we call filename_filter() */
 #ifdef HAVE_DIRENT_DNAMLEN
     size_t filename_len = dir->d_namlen;
 #else
-    size_t filename_len = strlen(filename);
+    size_t filename_len = 0;
 #endif
+
+    if (strncmp(filename, "./", 2) == 0) {
+#ifndef HAVE_DIRENT_DNAMLEN
+        filename_len = strlen(filename);
+#endif
+        filename++;
+        filename_len--;
+    }
+
     const ignores *ig = scandir_baton->ig;
 
     while (ig != NULL) {
-        if (strncmp(filename, "./", 2) == 0) {
-            filename++;
-            filename_len--;
-        }
-
         if (extension) {
             int match_pos = binary_search(extension, ig->extensions, 0, ig->extensions_len);
             if (match_pos >= 0) {
@@ -410,13 +424,20 @@ int filename_filter(const char *path, const struct dirent *dir, void *baton) {
             return 0;
         }
 
-        if (is_directory(path, dir) && filename[filename_len - 1] != '/') {
-            char *temp;
-            ag_asprintf(&temp, "%s/", filename);
-            int rv = path_ignore_search(ig, path_start, temp);
-            free(temp);
-            if (rv) {
-                return 0;
+        if (is_directory(path, dir)) {
+#ifndef HAVE_DIRENT_DNAMLEN
+            if (!filename_len) {
+                filename_len = strlen(filename);
+            }
+#endif
+            if (filename[filename_len - 1] != '/') {
+                char *temp;
+                ag_asprintf(&temp, "%s/", filename);
+                int rv = path_ignore_search(ig, path_start, temp);
+                free(temp);
+                if (rv) {
+                    return 0;
+                }
             }
         }
         ig = ig->parent;

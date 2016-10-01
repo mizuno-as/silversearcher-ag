@@ -1,8 +1,8 @@
+#include <ctype.h>
 #include <pcre.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
 #include <sys/time.h>
 #include <unistd.h>
 #ifdef _WIN32
@@ -73,7 +73,7 @@ int main(int argc, char **argv) {
     num_cores = (int)sysconf(_SC_NPROCESSORS_ONLN);
 #endif
 
-    workers_len = num_cores;
+    workers_len = num_cores < 8 ? num_cores : 8;
     if (opts.literal) {
         workers_len--;
     }
@@ -126,7 +126,7 @@ int main(int argc, char **argv) {
         }
         if (opts.word_regexp) {
             char *word_regexp_query;
-            ag_asprintf(&word_regexp_query, "\\b%s\\b", opts.query);
+            ag_asprintf(&word_regexp_query, "\\b(?:%s)\\b", opts.query);
             free(opts.query);
             opts.query = word_regexp_query;
             opts.query_len = strlen(opts.query);
