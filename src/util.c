@@ -1,12 +1,12 @@
 #include <ctype.h>
-#include <string.h>
-#include <stdio.h>
 #include <stdarg.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/stat.h>
 
-#include "util.h"
 #include "config.h"
+#include "util.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -292,6 +292,7 @@ int is_binary(const void *buf, const size_t buf_len) {
     size_t i;
 
     if (buf_len == 0) {
+        /* Is an empty file binary? Is it text? */
         return 0;
     }
 

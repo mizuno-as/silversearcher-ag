@@ -10,11 +10,11 @@
 
 #include "config.h"
 #include "ignore.h"
-#include "options.h"
 #include "lang.h"
 #include "log.h"
-#include "util.h"
+#include "options.h"
 #include "print.h"
+#include "util.h"
 
 const char *color_line_number = "\033[1;33m"; /* bold yellow */
 const char *color_match = "\033[30;43m";      /* black with yellow background */
@@ -91,18 +91,18 @@ Search Options:\n\
      --ignore-dir NAME    Alias for --ignore for compatibility with ack.\n\
   -m --max-count NUM      Skip the rest of a file after NUM matches (Default: 10,000)\n\
      --one-device         Don't follow links to other devices.\n\
-  -p --path-to-agignore STRING\n\
-                          Use .agignore file at STRING\n\
+  -p --path-to-ignore STRING\n\
+                          Use .ignore file at STRING\n\
   -Q --literal            Don't parse PATTERN as a regular expression\n\
   -s --case-sensitive     Match case sensitively\n\
   -S --smart-case         Match case insensitively unless PATTERN contains\n\
                           uppercase characters (Enabled by default)\n\
      --search-binary      Search binary files for matches\n\
   -t --all-text           Search all text files (doesn't include hidden files)\n\
-  -u --unrestricted       Search all files (ignore .agignore, .gitignore, etc.;\n\
+  -u --unrestricted       Search all files (ignore .ignore, .gitignore, etc.;\n\
                           searches binary and hidden files as well)\n\
   -U --skip-vcs-ignores   Ignore VCS ignore files\n\
-                          (.gitignore, .hgignore, .svnignore; still obey .agignore)\n\
+                          (.gitignore, .hgignore, .svnignore; still obey .ignore)\n\
   -v --invert-match\n\
   -w --word-regexp        Only match whole words\n\
   -W --width NUM          Truncate match lines after NUM characters\n\
@@ -144,6 +144,7 @@ void init_options(void) {
     opts.color_win_ansi = FALSE;
     opts.max_matches_per_file = 0;
     opts.max_search_depth = DEFAULT_MAX_SEARCH_DEPTH;
+    opts.mmap = TRUE;
     opts.multiline = TRUE;
     opts.width = 0;
     opts.path_sep = '\n';
@@ -257,6 +258,7 @@ void parse_options(int argc, char **argv, char **base_paths[], char **paths[]) {
         { "literal", no_argument, NULL, 'Q' },
         { "match", no_argument, &useless, 0 },
         { "max-count", required_argument, NULL, 'm' },
+        { "mmap", no_argument, &opts.mmap, TRUE },
         { "multiline", no_argument, &opts.multiline, TRUE },
         /* "no-" is deprecated. Remove these eventually. */
         { "no-numbers", no_argument, &opts.print_line_numbers, FALSE },
@@ -268,6 +270,7 @@ void parse_options(int argc, char **argv, char **base_paths[], char **paths[]) {
         { "nofollow", no_argument, &opts.follow_symlinks, 0 },
         { "nogroup", no_argument, &group, 0 },
         { "noheading", no_argument, &opts.print_path, PATH_PRINT_EACH_LINE },
+        { "nommap", no_argument, &opts.mmap, FALSE },
         { "nomultiline", no_argument, &opts.multiline, FALSE },
         { "nonumbers", no_argument, &opts.print_line_numbers, FALSE },
         { "nopager", no_argument, NULL, 0 },
@@ -280,7 +283,7 @@ void parse_options(int argc, char **argv, char **base_paths[], char **paths[]) {
         { "parallel", no_argument, &opts.parallel, 1 },
         { "passthrough", no_argument, &opts.passthrough, 1 },
         { "passthru", no_argument, &opts.passthrough, 1 },
-        { "path-to-agignore", required_argument, NULL, 'p' },
+        { "path-to-ignore", required_argument, NULL, 'p' },
         { "print0", no_argument, NULL, '0' },
         { "print-long-lines", no_argument, &opts.print_long_lines, 1 },
         { "recurse", no_argument, NULL, 'r' },
@@ -432,7 +435,7 @@ void parse_options(int argc, char **argv, char **base_paths[], char **paths[]) {
                 opts.recurse_dirs = 0;
                 break;
             case 'p':
-                opts.path_to_agignore = optarg;
+                opts.path_to_ignore = optarg;
                 break;
             case 'o':
                 opts.only_matching = 1;
