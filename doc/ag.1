@@ -1,13 +1,13 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "AG" "1" "September 2016" "" ""
+.TH "AG" "1" "December 2016" "" ""
 .
 .SH "NAME"
 \fBag\fR \- The Silver Searcher\. Like ack, but faster\.
 .
 .SH "SYNOPSIS"
-\fBag\fR [\fIfile\-type\fR] [\fIoptions\fR] PATTERN [PATH]
+\fBag\fR [\fIoptions\fR] \fIpattern\fR [\fIpath \.\.\.\fR]
 .
 .SH "DESCRIPTION"
 Recursively search for PATTERN in PATH\. Like grep or ack, but faster\.
@@ -136,7 +136,7 @@ Skip the rest of a file after NUM matches\. Default is 0, which never skips\.
 .
 .TP
 \fB\-\-[no]mmap\fR
-Toggle use of memory\-mapped I/O\. Defaults to true\.
+Toggle use of memory\-mapped I/O\. Defaults to true on platforms where \fBmmap()\fR is faster than \fBread()\fR\. (All but macOS\.)
 .
 .TP
 \fB\-\-[no]multiline\fR
@@ -184,7 +184,7 @@ Do not parse PATTERN as a regular expression\. Try to match it literally\.
 .
 .TP
 \fB\-r \-\-recurse\fR
-Recurse into directories when seacrhing\. Default is true\.
+Recurse into directories when searching\. Default is true\.
 .
 .TP
 \fB\-s \-\-case\-sensitive\fR
@@ -220,7 +220,7 @@ Search \fIall\fR files\. This ignores \.ignore, \.gitignore, etc\. It searches b
 .
 .TP
 \fB\-U \-\-skip\-vcs\-ignores\fR
-Ignore VCS ignore files (\.gitignore, \.hgignore, svn:ignore), but still use \.ignore\.
+Ignore VCS ignore files (\.gitignore, \.hgignore), but still use \.ignore\.
 .
 .TP
 \fB\-v \-\-invert\-match\fR
@@ -260,13 +260,13 @@ Search contents of compressed files\. Currently, gz and xz are supported\. This 
 Separate the filenames with \fB\e0\fR, rather than \fB\en\fR: this allows \fBxargs \-0 <command>\fR to correctly process filenames containing spaces or newlines\.
 .
 .SH "FILE TYPES"
-It is possible to restrict the types of files searched\. For example, passing \fB\-\-html\fR as the \fBfile\-types\fR parameter will search only files with the extensions \fBhtm\fR, \fBhtml\fR, \fBshtml\fR or \fBxhtml\fR\. For a list of supported types, run \fBag \-\-list\-file\-types\fR\.
+It is possible to restrict the types of files searched\. For example, passing \fB\-\-html\fR will search only files with the extensions \fBhtm\fR, \fBhtml\fR, \fBshtml\fR or \fBxhtml\fR\. For a list of supported types, run \fBag \-\-list\-file\-types\fR\.
 .
 .SH "IGNORING FILES"
-By default, ag will ignore files whose names match patterns in \.gitignore, \.hgignore, or \.ignore\. These files can be anywhere in the directories being searched\. Ag also ignores files matched by the svn:ignore property if \fBsvn \-\-version\fR is 1\.6 or older\. Finally, ag looks in $HOME/\.agignore for ignore patterns\. Binary files are ignored by default as well\.
+By default, ag will ignore files whose names match patterns in \.gitignore, \.hgignore, or \.ignore\. These files can be anywhere in the directories being searched\. Binary files are ignored by default as well\. Finally, ag looks in $HOME/\.agignore for ignore patterns\.
 .
 .P
-If you want to ignore \.gitignore, \.hgignore, and svn:ignore, but still take \.ignore into account, use \fB\-U\fR\.
+If you want to ignore \.gitignore and \.hgignore, but still take \.ignore into account, use \fB\-U\fR\.
 .
 .P
 Use the \fB\-t\fR option to search all text files; \fB\-a\fR to search all files; and \fB\-u\fR to search all, including hidden files\.
@@ -276,6 +276,12 @@ Use the \fB\-t\fR option to search all text files; \fB\-a\fR to search all files
 .
 .P
 \fBag foo /bar/\fR: Find matches for "foo" in path /bar/\.
+.
+.P
+\fBag \-\- \-\-foo\fR: Find matches for "\-\-foo" in the current directory\. (As with most UNIX command line utilities, "\-\-" is used to signify that the remaining arguments should not be treated as options\.)
+.
+.SH "ABOUT"
+ag was originally created by Geoff Greer\. More information (and the latest release) can be found at http://geoff\.greer\.fm/ag
 .
 .SH "SEE ALSO"
 grep(1)

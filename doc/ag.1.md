@@ -3,7 +3,7 @@ ag(1) -- The Silver Searcher. Like ack, but faster.
 
 ## SYNOPSIS
 
-`ag` [<file-type>] [<options>] PATTERN [PATH]
+`ag` [_options_] _pattern_ [_path ..._]
 
 ## DESCRIPTION
 
@@ -109,7 +109,8 @@ Recursively search for PATTERN in PATH. Like grep or ack, but faster.
     Skip the rest of a file after NUM matches. Default is 0, which never skips.
 
   * `--[no]mmap`:
-    Toggle use of memory-mapped I/O. Defaults to true.
+    Toggle use of memory-mapped I/O. Defaults to true on platforms where
+    `mmap()` is faster than `read()`. (All but macOS.)
 
   * `--[no]multiline`:
     Match regexes across newlines. Enabled by default.
@@ -151,7 +152,7 @@ Recursively search for PATTERN in PATH. Like grep or ack, but faster.
     Do not parse PATTERN as a regular expression. Try to match it literally.
 
   * `-r --recurse`:
-    Recurse into directories when seacrhing. Default is true.
+    Recurse into directories when searching. Default is true.
 
   * `-s --case-sensitive`:
     Match case-sensitively.
@@ -180,7 +181,7 @@ Recursively search for PATTERN in PATH. Like grep or ack, but faster.
     binary and hidden files as well.
 
   * `-U --skip-vcs-ignores`:
-    Ignore VCS ignore files (.gitignore, .hgignore, svn:ignore), but still
+    Ignore VCS ignore files (.gitignore, .hgignore), but still
     use .ignore.
 
   * `-v --invert-match`:
@@ -219,20 +220,18 @@ Recursively search for PATTERN in PATH. Like grep or ack, but faster.
 ## FILE TYPES
 
 It is possible to restrict the types of files searched. For example, passing
-`--html` as the `file-types` parameter will search only files with the
-extensions `htm`, `html`, `shtml` or `xhtml`. For a list of supported types,
-run `ag --list-file-types`.
+`--html` will search only files with the extensions `htm`, `html`, `shtml`
+or `xhtml`. For a list of supported types, run `ag --list-file-types`.
 
 ## IGNORING FILES
 
 By default, ag will ignore files whose names match patterns in .gitignore,
 .hgignore, or .ignore. These files can be anywhere in the directories being
-searched. Ag also ignores files matched by the svn:ignore property if `svn
---version` is 1.6 or older.  Finally, ag looks in $HOME/.agignore for ignore
-patterns. Binary files are ignored by default as well.
+searched. Binary files are ignored by default as well. Finally, ag looks in
+$HOME/.agignore for ignore patterns.
 
-If you want to ignore .gitignore, .hgignore, and svn:ignore, but still take
-.ignore into account, use `-U`.
+If you want to ignore .gitignore and .hgignore, but still take .ignore into
+account, use `-U`.
 
 Use the `-t` option to search all text files; `-a` to search all files; and `-u`
 to search all, including hidden files.
@@ -244,6 +243,16 @@ to search all, including hidden files.
 
 `ag foo /bar/`:
   Find matches for "foo" in path /bar/.
+
+`ag -- --foo`:
+  Find matches for "--foo" in the current directory. (As with most UNIX command
+  line utilities, "--" is used to signify that the remaining arguments should
+  not be treated as options.)
+
+## ABOUT
+
+ag was originally created by Geoff Greer. More information (and the latest
+release) can be found at http://geoff.greer.fm/ag
 
 ## SEE ALSO
 

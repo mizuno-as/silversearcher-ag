@@ -8,7 +8,7 @@ A code searching tool similar to `ack`, with a focus on speed.
 
 [![#ag on Freenode](http://img.shields.io/Freenode/%23ag.png)](https://webchat.freenode.net/?channels=ag)
 
-Do you know C? I invite you to pair with me to [help me get to Ag 1.0](http://geoff.greer.fm/2014/10/13/help-me-get-to-ag-10/).
+Do you know C? Want to improve ag? [I invite you to pair with me](http://geoff.greer.fm/2014/10/13/help-me-get-to-ag-10/).
 
 
 ## What's so great about Ag?
@@ -24,7 +24,7 @@ Ag is quite stable now. Most changes are new features, minor bug fixes, or perfo
 
     ag test_blah ~/code/  4.67s user 4.58s system 286% cpu 3.227 total
 
-Ack and Ag found the same results, but Ag was 34x faster (3.2 seconds vs 110 seconds). My `~/code` directory is about 8GB. Thanks to git/hg/svn-ignore, Ag only searched 700MB of that.
+Ack and Ag found the same results, but Ag was 34x faster (3.2 seconds vs 110 seconds). My `~/code` directory is about 8GB. Thanks to git/hg/ignore, Ag only searched 700MB of that.
 
 There are also [graphs of performance across releases](http://geoff.greer.fm/ag/speed/).
 
@@ -42,7 +42,7 @@ I've written several blog posts showing how I've improved performance. These inc
 
 ## Installing
 
-### OS X
+### MacOS
 
     brew install the_silver_searcher
 
@@ -95,7 +95,7 @@ Run the relevant [`setup-*.exe`](https://cygwin.com/install.html), and select "t
 ### Building master
 
 1. Install dependencies (Automake, pkg-config, PCRE, LZMA):
-    * OS X:
+    * MacOS:
 
             brew install automake pkg-config pcre xz
         or
@@ -151,10 +151,6 @@ or:
 
 Which has the same effect but will report every match on the line.
 
-There's also a fork of ack.vim tailored for use with Ag: [ag.vim][]
-[ack.vim]: https://github.com/mileszs/ack.vim
-[ag.vim]: https://github.com/rking/ag.vim
-
 ### Emacs
 
 You can use [ag.el][] as an Emacs front-end to Ag. See also: [helm-ag].
@@ -169,9 +165,8 @@ TextMate users can use Ag with [my fork](https://github.com/ggreer/AckMate) of t
 ## Other stuff you might like
 
 * [Ack](https://github.com/petdance/ack2) - Better than grep. Without Ack, Ag would not exist.
-* [AckMate](https://github.com/protocool/AckMate) - An ack-powered replacement for TextMate's slow built-in search.
 * [ack.vim](https://github.com/mileszs/ack.vim)
-* [ag.vim]( https://github.com/rking/ag.vim)
 * [Exuberant Ctags](http://ctags.sourceforge.net/) - Faster than Ag, but it builds an index beforehand. Good for *really* big codebases.
 * [Git-grep](http://git-scm.com/docs/git-grep) - As fast as Ag but only works on git repos.
+* [ripgrep](https://github.com/BurntSushi/ripgrep)
 * [Sack](https://github.com/sampson-chen/sack) - A utility that wraps Ack and Ag. It removes a lot of repetition from searching and opening matching files.
