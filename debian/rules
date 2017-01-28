@@ -14,3 +14,6 @@ override_dh_install:
 	mv  $(CURDIR)/debian/silversearcher-ag/usr/share/the_silver_searcher/completions/ag.bashcomp.sh \
             $(CURDIR)/debian/silversearcher-ag/usr/share/bash-completion/completions/ag
 	rm -rf $(CURDIR)/debian/silversearcher-ag/usr/share/the_silver_searcher
+	mv  $(CURDIR)/debian/silversearcher-ag/usr/share/zsh/site-functions/_the_silver_searcher \
+            $(CURDIR)/debian/silversearcher-ag/usr/share/zsh/vendor-completions/
+	rm -rf $(CURDIR)/debian/silversearcher-ag/usr/share/zsh/site-functions
