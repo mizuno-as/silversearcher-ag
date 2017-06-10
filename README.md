@@ -42,7 +42,7 @@ I've written several blog posts showing how I've improved performance. These inc
 
 ## Installing
 
-### MacOS
+### macOS
 
     brew install the_silver_searcher
 
@@ -76,6 +76,16 @@ or
 
         sbopkg -i the_silver_searcher
 
+* openSUSE:
+
+        zypper install the_silver_searcher
+
+* CentOS:
+        
+        yum install the_silver_searcher
+
+* SUSE Linux Enterprise: Follow [these simple instructions](https://software.opensuse.org/download.html?project=utilities&package=the_silver_searcher).
+
 
 ### BSD
 
@@ -95,7 +105,7 @@ Run the relevant [`setup-*.exe`](https://cygwin.com/install.html), and select "t
 ### Building master
 
 1. Install dependencies (Automake, pkg-config, PCRE, LZMA):
-    * MacOS:
+    * macOS:
 
             brew install automake pkg-config pcre xz
         or
@@ -111,6 +121,10 @@ Run the relevant [`setup-*.exe`](https://cygwin.com/install.html), and select "t
 
             yum -y groupinstall "Development Tools"
             yum -y install pcre-devel xz-devel
+    * openSUSE:
+
+            zypper source-install --build-deps-only the_silver_searcher
+
     * Windows: It's complicated. See [this wiki page](https://github.com/ggreer/the_silver_searcher/wiki/Windows).
 2. Run the build script (which just runs aclocal, automake, etc):
 
