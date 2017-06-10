@@ -45,18 +45,18 @@ void search_buf(const char *buf, const size_t buf_len,
         matches_len = 1;
     } else if (opts.literal) {
         const char *match_ptr = buf;
-        strncmp_fp ag_strnstr_fp = get_strstr(opts.casing);
 
         while (buf_offset < buf_len) {
 /* hash_strnstr only for little-endian platforms that allow unaligned access */
 #if defined(__i386__) || defined(__x86_64__)
             /* Decide whether to fall back on boyer-moore */
-            if ((size_t)opts.query_len < 2 * sizeof(uint16_t) - 1 || opts.query_len >= UCHAR_MAX)
-                match_ptr = ag_strnstr_fp(match_ptr, opts.query, buf_len - buf_offset, opts.query_len, alpha_skip_lookup, find_skip_lookup);
-            else
+            if ((size_t)opts.query_len < 2 * sizeof(uint16_t) - 1 || opts.query_len >= UCHAR_MAX) {
+                match_ptr = boyer_moore_strnstr(match_ptr, opts.query, buf_len - buf_offset, opts.query_len, alpha_skip_lookup, find_skip_lookup, opts.casing == CASE_INSENSITIVE);
+            } else {
                 match_ptr = hash_strnstr(match_ptr, opts.query, buf_len - buf_offset, opts.query_len, h_table, opts.casing == CASE_SENSITIVE);
+            }
 #else
-            match_ptr = ag_strnstr_fp(match_ptr, opts.query, buf_len - buf_offset, opts.query_len, alpha_skip_lookup, find_skip_lookup);
+            match_ptr = boyer_moore_strnstr(match_ptr, opts.query, buf_len - buf_offset, opts.query_len, alpha_skip_lookup, find_skip_lookup, opts.casing == CASE_INSENSITIVE);
 #endif
 
             if (match_ptr == NULL) {
@@ -174,7 +174,7 @@ multiline_done:
         pthread_mutex_unlock(&stats_mtx);
     }
 
-    if (matches_len > 0) {
+    if (matches_len > 0 || opts.print_all_paths) {
         if (binary == -1 && !opts.print_filename_only) {
             binary = is_binary((const void *)buf, buf_len);
         }
@@ -239,12 +239,29 @@ void search_stream(FILE *stream, const char *path) {
 }
 
 void search_file(const char *file_full_path) {
-    int fd;
+    int fd = -1;
     off_t f_len = 0;
     char *buf = NULL;
     struct stat statbuf;
     int rv = 0;
     FILE *fp = NULL;
+
+    rv = stat(file_full_path, &statbuf);
+    if (rv != 0) {
+        log_err("Skipping %s: Error fstat()ing file.", file_full_path);
+        goto cleanup;
+    }
+
+    if (opts.stdout_inode != 0 && opts.stdout_inode == statbuf.st_ino) {
+        log_debug("Skipping %s: stdout is redirected to it", file_full_path);
+        goto cleanup;
+    }
+
+    // handling only regular files and FIFOs
+    if (!S_ISREG(statbuf.st_mode) && !S_ISFIFO(statbuf.st_mode)) {
+        log_err("Skipping %s: Mode %u is not a file.", file_full_path, statbuf.st_mode);
+        goto cleanup;
+    }
 
     fd = open(file_full_path, O_RDONLY);
     if (fd < 0) {
@@ -253,6 +270,7 @@ void search_file(const char *file_full_path) {
         goto cleanup;
     }
 
+    // repeating stat check with file handle to prevent TOCTOU issue
     rv = fstat(fd, &statbuf);
     if (rv != 0) {
         log_err("Skipping %s: Error fstat()ing file.", file_full_path);
@@ -264,7 +282,8 @@ void search_file(const char *file_full_path) {
         goto cleanup;
     }
 
-    if ((statbuf.st_mode & S_IFMT) == 0) {
+    // handling only regular files and FIFOs
+    if (!S_ISREG(statbuf.st_mode) && !S_ISFIFO(statbuf.st_mode)) {
         log_err("Skipping %s: Mode %u is not a file.", file_full_path, statbuf.st_mode);
         goto cleanup;
     }
@@ -360,7 +379,9 @@ cleanup:
         UnmapViewOfFile(buf);
 #else
         if (opts.mmap) {
-            munmap(buf, f_len);
+            if (buf != MAP_FAILED) {
+                munmap(buf, f_len);
+            }
         } else {
             free(buf);
         }
@@ -463,6 +484,8 @@ void search_dir(ignores *ig, const char *base_path, const char *path, const int 
     struct dirent *dir = NULL;
     scandir_baton_t scandir_baton;
     int results = 0;
+    size_t base_path_len = 0;
+    const char *path_start = path;
 
     char *dir_full_path = NULL;
     const char *ignore_file = NULL;
@@ -478,7 +501,7 @@ void search_dir(ignores *ig, const char *base_path, const char *path, const int 
     }
 
     /* find .*ignore files to load ignore patterns from */
-    for (i = 0; opts.skip_vcs_ignores ? (i <= 1) : (ignore_pattern_files[i] != NULL); i++) {
+    for (i = 0; opts.skip_vcs_ignores ? (i == 0) : (ignore_pattern_files[i] != NULL); i++) {
         ignore_file = ignore_pattern_files[i];
         ag_asprintf(&dir_full_path, "%s/%s", path, ignore_file);
         load_ignore_patterns(ig, dir_full_path);
@@ -486,9 +509,20 @@ void search_dir(ignores *ig, const char *base_path, const char *path, const int 
         dir_full_path = NULL;
     }
 
+    /* path_start is the part of path that isn't in base_path
+     * base_path will have a trailing '/' because we put it there in parse_options
+     */
+    base_path_len = base_path ? strlen(base_path) : 0;
+    for (i = 0; ((size_t)i < base_path_len) && (path[i]) && (base_path[i] == path[i]); i++) {
+        path_start = path + i + 1;
+    }
+    log_debug("search_dir: path is '%s', base_path is '%s', path_start is '%s'", path, base_path, path_start);
+
     scandir_baton.ig = ig;
     scandir_baton.base_path = base_path;
-    scandir_baton.base_path_len = base_path ? strlen(base_path) : 0;
+    scandir_baton.base_path_len = base_path_len;
+    scandir_baton.path_start = path_start;
+
     results = ag_scandir(path, &dir_list, &filename_filter, &scandir_baton);
     if (results == 0) {
         log_debug("No results found in directory %s", path);
