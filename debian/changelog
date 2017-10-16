@@ -1,3 +1,20 @@
+silversearcher-ag (2.1.0-1) unstable; urgency=medium
+
+  * new upstream release
+  * Bump debhelper compat & build-dep to 10.
+  * Enable test
+  * debian/control
+    - Set Standards-Version: 4.1.1.
+    - Replace priority from extra to optional.
+    - Add Build-Depends: python-cram & git to enable test.
+  * debian/copyright
+    - Update copyright year to 2013-2017.
+  * debian/rules
+    - Drop override_dh_auto_configure unnecessary.
+    - Drop override_dh_auto_test to enable test.
+
+ -- Hajime Mizuno <mizuno-as@ubuntu.com>  Mon, 16 Oct 2017 21:26:42 +0900
+
 silversearcher-ag (2.0.0-1) unstable; urgency=medium
 
   * new upstream release
