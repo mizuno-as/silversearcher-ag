@@ -6,7 +6,7 @@ A code searching tool similar to `ack`, with a focus on speed.
 
 [![Floobits Status](https://floobits.com/ggreer/ag.svg)](https://floobits.com/ggreer/ag/redirect)
 
-[![#ag on Freenode](http://img.shields.io/Freenode/%23ag.png)](https://webchat.freenode.net/?channels=ag)
+[![#ag on Freenode](https://img.shields.io/badge/Freenode-%23ag-brightgreen.svg)](https://webchat.freenode.net/?channels=ag)
 
 Do you know C? Want to improve ag? [I invite you to pair with me](http://geoff.greer.fm/2014/10/13/help-me-get-to-ag-10/).
 
@@ -67,7 +67,7 @@ or
         yum install epel-release.noarch the_silver_searcher
 * Gentoo
 
-        emerge the_silver_searcher
+        emerge -a sys-apps/the_silver_searcher
 * Arch
 
         pacman -S the_silver_searcher
@@ -96,9 +96,17 @@ or
 
         pkg_add the_silver_searcher
 
-### Cygwin
+### Windows
 
-Run the relevant [`setup-*.exe`](https://cygwin.com/install.html), and select "the\_silver\_searcher" in the "Utils" category.
+* Win32/64
+
+  Unofficial daily builds are [available](https://github.com/k-takata/the_silver_searcher-win32).
+* MSYS2
+
+        pacman -S mingw-w64-{i686,x86_64}-ag
+* Cygwin
+
+  Run the relevant [`setup-*.exe`](https://cygwin.com/install.html), and select "the\_silver\_searcher" in the "Utils" category.
 
 ## Building from source
 
@@ -130,7 +138,7 @@ Run the relevant [`setup-*.exe`](https://cygwin.com/install.html), and select "t
 
         ./build.sh
 
-  On Windows (inside an msys/MinGW shell):
+   On Windows (inside an msys/MinGW shell):
 
         make -f Makefile.w32
 3. Make install:

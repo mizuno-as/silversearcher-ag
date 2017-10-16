@@ -12,6 +12,9 @@ Language types are output:
     --ada
         .ada  .adb  .ads
   
+    --asciidoc
+        .adoc  .ad  .asc  .asciidoc
+  
     --asm
         .asm  .s
   
@@ -57,6 +60,9 @@ Language types are output:
     --delphi
         .pas  .int  .dfm  .nfm  .dof  .dpk  .dpr  .dproj  .groupproj  .bdsgroup  .bdsproj
   
+    --dot
+        .dot  .gv
+  
     --ebuild
         .ebuild  .eclass
   
@@ -96,6 +102,9 @@ Language types are output:
     --haml
         .haml
   
+    --handlebars
+        .hbs
+  
     --haskell
         .hs  .lhs
   
@@ -110,6 +119,9 @@ Language types are output:
   
     --ini
         .ini
+  
+    --ipython
+        .ipynb
   
     --jade
         .jade
@@ -168,11 +180,17 @@ Language types are output:
     --mathematica
         .m  .wl
   
+    --md
+        .markdown  .mdown  .mdwn  .mkdn  .mkd  .md
+  
     --mercury
         .m  .moo
   
     --nim
         .nim
+  
+    --nix
+        .nix
   
     --objc
         .m  .h
@@ -186,6 +204,9 @@ Language types are output:
     --octave
         .m
   
+    --org
+        .org
+  
     --parrot
         .pir  .pasm  .pmc  .ops  .pod  .pg  .tg
   
@@ -197,6 +218,9 @@ Language types are output:
   
     --pike
         .pike  .pmod
+  
+    --plist
+        .plist
   
     --plone
         .pt  .cpt  .metadata  .cpy  .py  .xml  .zcml
@@ -313,7 +337,7 @@ Language types are output:
         .wadl
   
     --xml
-        .xml  .dtd  .xsl  .xslt  .ent  .tld
+        .xml  .dtd  .xsl  .xslt  .ent  .tld  .plist
   
     --yaml
         .yaml  .yml
