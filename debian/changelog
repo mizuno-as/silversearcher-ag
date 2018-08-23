@@ -1,6 +1,8 @@
 silversearcher-ag (2.2.0-1) unstable; urgency=medium
 
   * new upstream release
+  * debian/control
+    - Set Standards-Version: 4.1.4.
   * debian/copyright
     - Update copyright year to 2013-2017.
 
