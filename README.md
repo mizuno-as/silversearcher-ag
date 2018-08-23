@@ -101,6 +101,10 @@ or
 * Win32/64
 
   Unofficial daily builds are [available](https://github.com/k-takata/the_silver_searcher-win32).
+  
+* Chocolatey
+
+        choco install ag
 * MSYS2
 
         pacman -S mingw-w64-{i686,x86_64}-ag
@@ -163,7 +167,7 @@ You may need to use `sudo` or run as root for the make install.
 
 ### Vim
 
-You can use Ag with [ack.vim][] by adding the following line to your `.vimrc`:
+You can use Ag with [ack.vim](https://github.com/mileszs/ack.vim) by adding the following line to your `.vimrc`:
 
     let g:ackprg = 'ag --nogroup --nocolor --column'
 

@@ -15,6 +15,9 @@ Language types are output:
     --asciidoc
         .adoc  .ad  .asc  .asciidoc
   
+    --apl
+        .apl
+  
     --asm
         .asm  .s
   
@@ -42,6 +45,9 @@ Language types are output:
     --coffee
         .coffee  .cjsx
   
+    --coq
+        .coq  .g  .v
+  
     --cpp
         .cpp  .cc  .C  .cxx  .m  .hpp  .hh  .h  .H  .hxx  .tpp
   
@@ -60,8 +66,14 @@ Language types are output:
     --delphi
         .pas  .int  .dfm  .nfm  .dof  .dpk  .dpr  .dproj  .groupproj  .bdsgroup  .bdsproj
   
+    --dlang
+        .d  .di
+  
     --dot
         .dot  .gv
+  
+    --dts
+        .dts  .dtsi
   
     --ebuild
         .ebuild  .eclass
@@ -106,7 +118,7 @@ Language types are output:
         .hbs
   
     --haskell
-        .hs  .lhs
+        .hs  .hsig  .lhs
   
     --haxe
         .hx
@@ -117,17 +129,29 @@ Language types are output:
     --html
         .htm  .html  .shtml  .xhtml
   
+    --idris
+        .idr  .ipkg  .lidr
+  
     --ini
         .ini
   
     --ipython
         .ipynb
   
+    --isabelle
+        .thy
+  
+    --j
+        .ijs
+  
     --jade
         .jade
   
     --java
         .java  .properties
+  
+    --jinja2
+        .j2
   
     --js
         .es6  .js  .jsx  .vue
@@ -186,6 +210,9 @@ Language types are output:
     --mercury
         .m  .moo
   
+    --naccess
+        .asa  .rsa
+  
     --nim
         .nim
   
@@ -210,6 +237,9 @@ Language types are output:
     --parrot
         .pir  .pasm  .pmc  .ops  .pod  .pg  .tg
   
+    --pdb
+        .pdb
+  
     --perl
         .pl  .pm  .pm6  .pod  .t
   
@@ -227,6 +257,9 @@ Language types are output:
   
     --proto
         .proto
+  
+    --pug
+        .pug
   
     --puppet
         .pp
@@ -250,7 +283,7 @@ Language types are output:
         .rs
   
     --r
-        .R  .Rmd  .Rnw  .Rtex  .Rrst
+        .r  .R  .Rmd  .Rnw  .Rtex  .Rrst
   
     --rdoc
         .rdoc
@@ -285,6 +318,9 @@ Language types are output:
     --sql
         .sql  .ctl
   
+    --stata
+        .do  .ado
+  
     --stylus
         .styl
   
@@ -294,8 +330,17 @@ Language types are output:
     --tcl
         .tcl  .itcl  .itk
   
+    --terraform
+        .tf  .tfvars
+  
     --tex
         .tex  .cls  .sty
+  
+    --thrift
+        .thrift
+  
+    --tla
+        .tla
   
     --tt
         .tt  .tt2  .ttml
