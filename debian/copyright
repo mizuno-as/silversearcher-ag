@@ -3,11 +3,11 @@ Upstream-Name: The Silver Searcher
 Source: https://github.com/ggreer/the_silver_searcher
 
 Files: *
-Copyright: 2013-2017 Geoff Greer <geoff@greer.fm>
+Copyright: 2013-2018 Geoff Greer <geoff@greer.fm>
 License: Apache-2.0
 
 Files: debian/*
-Copyright: 2013-2017 Hajime Mizuno <mizuno-as@ubuntu.com>
+Copyright: 2013-2018 Hajime Mizuno <mizuno-as@ubuntu.com>
 License: Apache-2.0
 
 License: Apache-2.0

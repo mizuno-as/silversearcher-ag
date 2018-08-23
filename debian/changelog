@@ -1,3 +1,11 @@
+silversearcher-ag (2.2.0-1) unstable; urgency=medium
+
+  * new upstream release
+  * debian/copyright
+    - Update copyright year to 2013-2017.
+
+ -- Hajime Mizuno <mizuno-as@ubuntu.com>  Thu, 23 Aug 2018 14:27:30 +0900
+
 silversearcher-ag (2.1.0-1) unstable; urgency=medium
 
   * new upstream release
