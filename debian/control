@@ -3,7 +3,7 @@ Section: utils
 Priority: optional
 Maintainer: Hajime Mizuno <mizuno-as@ubuntu.com>
 Build-Depends: debhelper (>= 11), pkg-config, libpcre3-dev, zlib1g-dev, liblzma-dev, python-cram, git
-Standards-Version: 4.1.4
+Standards-Version: 4.2.1
 Homepage: https://github.com/ggreer/the_silver_searcher
 
 Package: silversearcher-ag
