@@ -4,7 +4,7 @@ silversearcher-ag (2.2.0-1) unstable; urgency=medium
   * debian/control
     - Set Standards-Version: 4.1.4.
   * debian/copyright
-    - Update copyright year to 2013-2017.
+    - Update copyright year to 2013-2018.
 
  -- Hajime Mizuno <mizuno-as@ubuntu.com>  Thu, 23 Aug 2018 14:27:30 +0900
 
