@@ -6,6 +6,7 @@ silversearcher-ag (2.2.0-1) unstable; urgency=medium
     - Set Standards-Version: 4.2.1
   * debian/copyright
     - Update copyright year to 2013-2018.
+    - Change copyright format uri to https.
 
  -- Hajime Mizuno <mizuno-as@ubuntu.com>  Wed, 03 Oct 2018 21:54:47 +0900
 
