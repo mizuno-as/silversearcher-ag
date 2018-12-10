@@ -4,6 +4,9 @@ silversearcher-ag (2.2.0-1) unstable; urgency=medium
   * Bump debhelper compat & build-dep to 11.
   * debian/control
     - Set Standards-Version: 4.2.1
+    - Remove Build-Depends: python-cram & git to skip test.
+  * debian/rules
+    - Override dh_auto_test to skip test.
   * debian/copyright
     - Update copyright year to 2013-2018.
     - Change copyright format uri to https.
