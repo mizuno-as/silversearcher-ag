@@ -1,2 +1,4 @@
-version=3
-https://github.com/ggreer/the_silver_searcher/releases /ggreer/the_silver_searcher/archive/(.+)\.tar\.gz
+version=4
+
+opts=pgpsigurlmangle=s/$/.asc/ \
+https://geoff.greer.fm/ag releases/the_silver_searcher-(.+)\.tar\.gz

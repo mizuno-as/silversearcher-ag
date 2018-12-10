@@ -7,6 +7,12 @@ silversearcher-ag (2.2.0-1) unstable; urgency=medium
   * debian/copyright
     - Update copyright year to 2013-2018.
     - Change copyright format uri to https.
+  * debian/upstream/signing-key.asc
+    - Add upstream signing key file.
+  * debian/watch
+    - Bump version to 4.
+    - Change upstream source sites to hoge from GitHub.
+    - Add signature verification.
 
  -- Hajime Mizuno <mizuno-as@ubuntu.com>  Wed, 03 Oct 2018 21:54:47 +0900
 
