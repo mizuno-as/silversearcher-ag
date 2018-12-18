@@ -1,6 +1,6 @@
 silversearcher-ag (2.2.0-1) unstable; urgency=medium
 
-  * new upstream release
+  * New upstream release
   * Bump debhelper compat & build-dep to 11.
   * debian/control
     - Set Standards-Version: 4.2.1
@@ -14,7 +14,7 @@ silversearcher-ag (2.2.0-1) unstable; urgency=medium
     - Add upstream signing key file.
   * debian/watch
     - Bump version to 4.
-    - Change upstream source sites to hoge from GitHub.
+    - Change upstream source sites to geoff.greer.fm from GitHub.
     - Add signature verification.
   * debian/upstream/metadata
     - Add upstream metadata file.
